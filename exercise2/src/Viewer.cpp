@@ -60,9 +60,28 @@ void Viewer::CreateVertexBuffers()
 		1, -1, 0, 1
 	};*/
 	GLfloat positions[] = {
-		 0,  1, 0, 1,   255, 0,   0, 1,
-		-1, -1, 0, 1, 0,   0,   255, 1,
-		 1, -1, 0, 1,   0,   255, 0, 1
+		 0,  1, 0, 1, 1, 0, 0, 1,
+		-1, -1, 0, 1, 0, 1, 0, 1,
+		 1, -1, 0, 1, 0, 0, 1, 1
+	};
+	GLfloat tet[] = {
+		 1,  1, 1, 1, 1, 0, 0, 1,
+		 1, -1, -1, 1, 1, 0, 0, 1,
+		 -1, 1, -1, 1, 1, 0, 0, 1,
+
+		  1,  1, 1, 1, 0, 1, 0, 1,
+		 -1, -1, 1, 1, 0, 1, 0, 1,
+		 1, -1, -1, 1, 0, 1, 0, 1,
+
+		 1,  1, 1, 1, 0, 0, 1, 1,
+		 -1, 1, -1, 1, 0, 0, 1, 1,
+		 -1, -1, 1, 1, 0, 0, 1, 1,
+
+		 -1,  1, -1, 1, 1, 1, 0, 1,
+		 1, -1, -1, 1, 1, 1, 0, 1,
+		 -1, 1, 1, 1, 1, 1, 0, 1
+
+
 	};
 
 
@@ -78,7 +97,8 @@ void Viewer::CreateVertexBuffers()
 	// Bind the buffer for subsequent settings
 	glBindBuffer(GL_ARRAY_BUFFER, position_buffer_id);
 	// Supply the position data
-	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tet), tet, GL_STATIC_DRAW);
 	// The buffer shall now be linked to the shader attribute
 	// "in_position". First, get the location of this attribute in 
 	// the shader program
@@ -86,7 +106,7 @@ void Viewer::CreateVertexBuffers()
 	// Enable this vertex attribute array
 	glEnableVertexAttribArray(vid);
 	// Set the format of the data to match the type of "in_position"
-	glVertexAttribPointer(vid, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glVertexAttribPointer(vid, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	/*** Begin of task 2.2.2 (a) ***
 	Create another buffer that will store color information. This works nearly
 	similar to the code above that creates the position buffer. Store the buffer
@@ -94,10 +114,11 @@ void Viewer::CreateVertexBuffers()
 	shader variable "in_color".*/
 	glGenBuffers(1, &color_buffer_id);
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer_id);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tet), tet, GL_STATIC_DRAW);
 	GLuint vid2 = glGetAttribLocation(program_id, "in_color");
 	glEnableVertexAttribArray(vid2);
-	glVertexAttribPointer(vid2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glVertexAttribPointer(vid2, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(4 * sizeof(float)));
 	/*** End of task 2.2.2 (a) ***/
 
 
@@ -235,11 +256,19 @@ void Viewer::drawContents()
 	First, find the location of these variables using glGetUniformLocation and
 	then set them with the command glUniformMatrix4fv.
 	*/
+	GLuint model = glGetUniformLocation(program_id, "modelViewMatrix");
+	GLuint mode2 = glGetUniformLocation(program_id, "projectionMatrix");
+
+	//copy matrix data from CPU memory onto GPU
+	glUniformMatrix4fv(model, 1, GL_FALSE, modelViewMatrix.data());
+	glUniformMatrix4fv(mode2, 1, GL_FALSE, projectionMatrix.data());
+
 
 	// Bind the vertex array 
 	glBindVertexArray(vertex_array_id);
 	// Draw the bound vertex array. Start at element 0 and draw 3 vertices
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	//glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 12);
 
 	/*** End of task 2.2.4 (b) ***/
 
